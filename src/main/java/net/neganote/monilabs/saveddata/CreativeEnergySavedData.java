@@ -1,18 +1,15 @@
 package net.neganote.monilabs.saveddata;
 
 import com.gregtechceu.gtceu.common.machine.owner.MachineOwner;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class CreativeEnergySavedData extends SavedData {
 
@@ -36,8 +33,13 @@ public class CreativeEnergySavedData extends SavedData {
     }
 
     public static CreativeEnergySavedData getOrCreate(ServerLevel serverLevel) {
-        return serverLevel.getDataStorage().computeIfAbsent(CreativeEnergySavedData::new,
-                CreativeEnergySavedData::new, DATA_NAME);
+        return serverLevel
+            .getDataStorage()
+            .computeIfAbsent(
+                CreativeEnergySavedData::new,
+                CreativeEnergySavedData::new,
+                DATA_NAME
+            );
     }
 
     @Override
@@ -45,8 +47,14 @@ public class CreativeEnergySavedData extends SavedData {
         ListTag ownerList = new ListTag();
         for (UUID ownerUUID : ownersMap.keySet()) {
             CompoundTag ownerTag = new CompoundTag();
-            ownerTag.putLong("ownerUUIDMSB", ownerUUID.getMostSignificantBits());
-            ownerTag.putLong("ownerUUIDLSB", ownerUUID.getLeastSignificantBits());
+            ownerTag.putLong(
+                "ownerUUIDMSB",
+                ownerUUID.getMostSignificantBits()
+            );
+            ownerTag.putLong(
+                "ownerUUIDLSB",
+                ownerUUID.getLeastSignificantBits()
+            );
             ownerTag.putBoolean("enabled", ownersMap.get(ownerUUID));
             ownerList.add(ownerTag);
         }
@@ -59,7 +67,12 @@ public class CreativeEnergySavedData extends SavedData {
         if (owner == null) {
             return false;
         }
-        return ownersMap.keySet().stream().filter(ownersMap::get).anyMatch(owner::isPlayerInTeam);
+        for (Map.Entry<UUID, Boolean> entry : ownersMap.entrySet()) {
+            if (entry.getValue() && owner.isPlayerInTeam(entry.getKey())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setEnabled(UUID uuid, boolean enabled) {
