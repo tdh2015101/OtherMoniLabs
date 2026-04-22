@@ -45,8 +45,9 @@ public class CreativeEnergySavedData extends SavedData {
     @Override
     public @NotNull CompoundTag save(@NotNull CompoundTag nbt) {
         ListTag ownerList = new ListTag();
-        for (UUID ownerUUID : ownersMap.keySet()) {
+        for (Map.Entry<UUID, Boolean> entry : ownersMap.entrySet()) {
             CompoundTag ownerTag = new CompoundTag();
+            var ownerUUID = entry.getKey();
             ownerTag.putLong(
                 "ownerUUIDMSB",
                 ownerUUID.getMostSignificantBits()
@@ -55,7 +56,7 @@ public class CreativeEnergySavedData extends SavedData {
                 "ownerUUIDLSB",
                 ownerUUID.getLeastSignificantBits()
             );
-            ownerTag.putBoolean("enabled", ownersMap.get(ownerUUID));
+            ownerTag.putBoolean("enabled", entry.getValue());
             ownerList.add(ownerTag);
         }
         nbt.put(ENERGY_OWNERS, ownerList);
